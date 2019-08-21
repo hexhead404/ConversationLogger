@@ -1,2 +1,3 @@
 # ConversationLogger
-Logs Lync conversations to local disk
+Listener logs Lync 2013 - Skype 2016 conversations to local disk, viewer displays them.
+
