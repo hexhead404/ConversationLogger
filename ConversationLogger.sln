@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LyncListener", "LyncListener\LyncListener.csproj", "{8F3125A1-E6A2-40B7-B558-A2ED086D92F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{8D1A63A2-9A9A-467A-ABFA-05E72D6459C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConversationViewer", "ConversationViewer\ConversationViewer.csproj", "{7A84D8B7-4165-43FD-84BD-4A37A187BA5A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F3125A1-E6A2-40B7-B558-A2ED086D92F2}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{8F3125A1-E6A2-40B7-B558-A2ED086D92F2}.Debug|Any CPU.Build.0 = Debug|x64
+		{8F3125A1-E6A2-40B7-B558-A2ED086D92F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F3125A1-E6A2-40B7-B558-A2ED086D92F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D1A63A2-9A9A-467A-ABFA-05E72D6459C4}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{8D1A63A2-9A9A-467A-ABFA-05E72D6459C4}.Debug|Any CPU.Build.0 = Debug|x64
+		{8D1A63A2-9A9A-467A-ABFA-05E72D6459C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D1A63A2-9A9A-467A-ABFA-05E72D6459C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A84D8B7-4165-43FD-84BD-4A37A187BA5A}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7A84D8B7-4165-43FD-84BD-4A37A187BA5A}.Debug|Any CPU.Build.0 = Debug|x64
+		{7A84D8B7-4165-43FD-84BD-4A37A187BA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A84D8B7-4165-43FD-84BD-4A37A187BA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {52F1ACDD-AEF2-4A50-869E-A346B3D6046F}
+	EndGlobalSection
+EndGlobal
