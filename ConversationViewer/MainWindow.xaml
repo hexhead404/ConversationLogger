@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:common="clr-namespace:ConversationLogger.Common;assembly=ConversationLogger.Common"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:ConversationLogger.Viewer.Behaviors"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
@@ -11,44 +13,77 @@
             <Setter Property="Margin" Value="4,0,0,0" />
             <Setter Property="Padding" Value="8,2"/>
         </Style>
+        <Style x:Key="SearchButton" TargetType="Button">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="1,0,0,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontFamily" Value="Marlett"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
         <Style TargetType="{x:Type ListViewItem}">
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
         </Style>
         <Style x:Key="Bubble" TargetType="Border">
-            <Setter Property="Margin" Value="0,4,40,0"/>
-            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,4,40,0"/>
+            <Setter Property="Padding" Value="4,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="BorderBrush" Value="Black"/>
             <Setter Property="Background">
                 <Setter.Value>
-                    <SolidColorBrush Color="BurlyWood"  Opacity="0.2"/>
+                    <SolidColorBrush Color="BurlyWood"  Opacity="0.4"/>
                 </Setter.Value>
             </Setter>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Direction}" Value="{x:Static common:MessageDirection.Outgoing}">
                     <Setter Property="Margin" Value="40,4,0,0"/>
-                    <Setter Property="Background" Value="DarkSeaGreen"/>
                     <Setter Property="Background">
                         <Setter.Value>
-                            <SolidColorBrush Color="DarkSeaGreen" Opacity="0.2"/>
+                            <SolidColorBrush Color="DarkSeaGreen" Opacity="0.4"/>
                         </Setter.Value>
                     </Setter>
                     <Setter Property="HorizontalAlignment" Value="Right"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsFilterMatch}" Value="true">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="Yellow"  Opacity="0.4"/>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCurrentMessage}" Value="true">
+                    <Setter Property="BorderThickness" Value="1"/>
                 </DataTrigger>
             </Style.Triggers>                                
         </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="8,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="Filter: "/>
+            <TextBox Grid.Column="2" VerticalAlignment="Center" Width="200" Text="{Binding Search.Filter, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Grid.Column="3" Style="{StaticResource SearchButton}" Content="3" Command="{Binding Search.PrevMatchCommand}"/>
+            <Button Grid.Column="4" Style="{StaticResource SearchButton}" Content="4" Command="{Binding Search.NextMatchCommand}"/>
+            <Button Grid.Column="5" Style="{StaticResource SearchButton}" Content="r" Command="{Binding Search.ClearFilterCommand}"/>
+        </Grid>
         <ListView Grid.Row="1" Grid.Column="0" SelectionMode="Single" ItemsSource="{Binding Logs}" SelectedItem="{Binding CurrentLog}">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -56,7 +91,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding CurrentConversation}" Margin="8,0">
+        <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding CurrentLog}" Margin="8,0">
             <Grid.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
             </Grid.InputBindings>
@@ -65,7 +100,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" FontWeight="Bold">
+            <TextBlock Grid.Row="0" FontWeight="Medium">
                 <Run>Conversation started </Run>
                 <TextBlock Text="{Binding Started, StringFormat=G}"/>
             </TextBlock>
@@ -73,6 +108,9 @@
                      ItemsSource="{Binding Messages}" SelectionMode="Extended"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <i:Interaction.Behaviors>
+                    <behaviors:MessageScrollIingBehavior/>
+                </i:Interaction.Behaviors>
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Border Style="{StaticResource Bubble}">
@@ -81,7 +119,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" FontWeight="Bold">
+                                <TextBlock Grid.Row="0" FontSize="12" FontWeight="Medium">
                                     <TextBlock Text="{Binding TimeStamp, StringFormat=G}"/>
                                     <Run> </Run>
                                     <TextBlock Text="{Binding Contact}"/>
@@ -97,5 +135,10 @@
                 <Button Content="Exit" Click="CloseButtonOnClick" />
             </StackPanel>
         </Grid>
+        <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusMessage}" />
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

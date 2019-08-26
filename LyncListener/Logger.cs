@@ -6,9 +6,6 @@ namespace ConversationLogger.LyncListener
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Serialization;
     using Common;
     using Microsoft.Lync.Model;
     using Microsoft.Lync.Model.Conversation;
@@ -29,13 +26,10 @@ namespace ConversationLogger.LyncListener
             this.Conversation.ParticipantAdded += this.ParticipantAdded;
             this.Conversation.ParticipantRemoved += this.ParticipantRemoved;
             this.Conversation.Participants?.ToList().ForEach(this.AddParticipant);
-            this.Self = this.Conversation.SelfParticipant?.Contact;
-
-            var id = $"{this.Conversation.Properties[ConversationProperty.Id]}";
-            this.LogPath = Path.Combine(Constants.LogFolder, $"{id}.xml");
+            this.ConversationId = this.GenerateConversationId($"{this.Conversation.Properties[ConversationProperty.Id]}");
             this.ConversationLog = File.Exists(this.LogPath) 
                 ? this.LogPath.Deserialize<Common.Conversation>()
-                : new Common.Conversation { Id = id };
+                : new Common.Conversation { Id = this.ConversationId };
         }
 
         /// <summary>
@@ -43,14 +37,16 @@ namespace ConversationLogger.LyncListener
         /// </summary>
         public Conversation Conversation { get; }
 
+        public string ConversationId { get; }
+
         /// <summary>
         /// Gets the log file path
         /// </summary>
-        public string LogPath { get; }
+        public string LogPath => Path.Combine(Constants.LogFolder, $"{this.ConversationId}.xml");
 
         private Common.Conversation ConversationLog { get; }
 
-        private Contact Self { get; }
+        private Contact Self => this.Conversation?.SelfParticipant?.Contact;
 
         /// <inheritdoc />
         public void Dispose()
@@ -69,6 +65,15 @@ namespace ConversationLogger.LyncListener
             }
         }
 
+        private string GenerateConversationId(string value)
+        {
+            // Replace spaces, and illegal chars (0-31) and illegal filename chars with hex equivalents
+            var replace = Enumerable.Range(0, 33).Select(i => (char)i).Concat("<>:\"/\\|?*".ToArray());
+            var clean = value.Select(c => replace.Contains(c) ? Convert.ToByte(c).ToString("x") : $"{c}");
+
+            return string.Join(string.Empty, clean);
+        }
+
         private void ParticipantAdded(object sender, ParticipantCollectionChangedEventArgs e)
         {
             this.AddParticipant(e.Participant);
@@ -79,12 +84,12 @@ namespace ConversationLogger.LyncListener
             var mods = new List<Modality>();
             if (participant?.Modalities != null && this.modalities.TryAdd(participant, mods))
             {
-                foreach (var mod in participant.Modalities.OfType<InstantMessageModality>())
+                foreach (var mod in participant.Modalities.Values.OfType<InstantMessageModality>())
                 {
                     mods.Add(mod);
                     mod.InstantMessageReceived += this.MessageReceived;
                 }
-                foreach (var mod in participant.Modalities.OfType<ContentSharingModality>())
+                foreach (var mod in participant.Modalities.Values.OfType<ContentSharingModality>())
                 {
                     mods.Add(mod);
                     mod.ContentAdded += this.ContentAdded;

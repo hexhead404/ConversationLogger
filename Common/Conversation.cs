@@ -2,7 +2,6 @@
 namespace ConversationLogger.Common
 {
     using System;
-    using System.Linq;
     using System.Xml.Serialization;
 
     public class Conversation

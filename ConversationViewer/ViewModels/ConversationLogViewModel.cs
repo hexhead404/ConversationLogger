@@ -2,10 +2,11 @@
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Linq;
     using System.Windows;
+    using System.Windows.Data;
     using Common;
 
     /// <summary>
@@ -13,10 +14,9 @@ namespace ConversationLogger.Viewer.ViewModels
     /// </summary>
     public class ConversationLogViewModel : ViewModelBase
     {
-        private readonly List<MessageViewModel> messages = new List<MessageViewModel>();
+        private readonly ObservableCollection<MessageViewModel> messages = new ObservableCollection<MessageViewModel>();
 
         private bool disposed;
-        private bool areMessagesSelected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConversationLogViewModel"/> class
@@ -25,9 +25,15 @@ namespace ConversationLogger.Viewer.ViewModels
         public ConversationLogViewModel(string path)
         {
             this.Path = path.AssertParamterFileExists(nameof(path));
+            this.Messages = CollectionViewSource.GetDefaultView(this.messages);
             this.CopyCommand = new Command(this, o => this.AreMessagesSelected, o => this.CopySelectedMessagesToClipboard());
             this.LoadConversation();
         }
+
+        /// <summary>
+        /// Gets or sets the conversation identifier
+        /// </summary>
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets the log file path
@@ -47,42 +53,33 @@ namespace ConversationLogger.Viewer.ViewModels
         /// <summary>
         /// Gets the messages
         /// </summary>
-        public IEnumerable<MessageViewModel> Messages => this.messages;
+        public ICollectionView Messages { get; }
 
         /// <summary>
         /// Gets a value indicating whether message(s) are selected
         /// </summary>
-        public bool AreMessagesSelected
-        {
-            get => this.areMessagesSelected;
-            set
-            {
-                if (value != this.areMessagesSelected)
-                {
-                    areMessagesSelected = value;
-                    this.NotifyPropertyChanged();
-                }
-            }
-        }
+        public bool AreMessagesSelected => this.Messages.OfType<MessageViewModel>().Any(m => m.IsSelected);
 
         /// <summary>
         /// Gets a command to copy selected messages to the clipboard
         /// </summary>
         public Command CopyCommand { get; private set; }
-
+        
         /// <summary>
         /// Loads the conversation from disk
         /// </summary>
         public void LoadConversation()
         {
             var log = this.Path.Deserialize<Conversation>();
+            this.Id = log.Id;
             this.Title = $"Conversation started {log.Started:G}";
             this.Started = log.Started;
             this.NotifyPropertyChanged(nameof(this.Title));
             this.NotifyPropertyChanged(nameof(this.Started));
 
             this.messages.ToList().ForEach(this.RemoveMessage);
-            log.Messages.ToList().ForEach(this.AddMessage);
+            log.Messages.OrderBy(m => m.TimeStamp).ToList().ForEach(this.AddMessage);
+            this.NotifyPropertyChanged(nameof(this.Messages));
         }
 
         /// <inheritdoc />
@@ -99,7 +96,7 @@ namespace ConversationLogger.Viewer.ViewModels
 
         private void AddMessage(Message message)
         {
-            var vm = new MessageViewModel(message);
+            var vm = new MessageViewModel(this, message);
             vm.PropertyChanged += this.MessageOnPropertyChanged;
             this.messages.Add(vm);
         }
@@ -122,7 +119,7 @@ namespace ConversationLogger.Viewer.ViewModels
         {
             if (e.PropertyName == nameof(MessageViewModel.IsSelected))
             {
-                this.AreMessagesSelected = this.messages.Any(m => m.IsSelected);
+                this.NotifyPropertyChanged(nameof(this.AreMessagesSelected));
             }
         }
     }

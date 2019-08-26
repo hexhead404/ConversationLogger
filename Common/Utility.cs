@@ -2,7 +2,10 @@
 namespace ConversationLogger.Common
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
 
     public static class Utility
     {
@@ -22,6 +25,26 @@ namespace ConversationLogger.Common
         {
             return !string.IsNullOrEmpty(value) && File.Exists(value) ? value 
                 : throw new ArgumentException($"File '{value}' doesn't exist", name);
+        }
+
+        public static bool EqualsIgnoreCase(this string instance, string value)
+        {
+            return instance.AssertParamterNotNull(nameof(instance)).Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static int IndexIgnoreCase(this string instance, string value)
+        {
+            return instance.AssertParamterNotNull(nameof(instance)).IndexOf(value, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool ContainsIgnoreCase(this IEnumerable<string> instance, string value)
+        {
+            return instance.AssertParamterNotNull(nameof(instance)).Contains(value, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static bool ContainsStringIgnoreCase(this string instance, string value)
+        {
+            return instance.AssertParamterNotNull(nameof(instance)).IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }

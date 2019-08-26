@@ -19,7 +19,7 @@ namespace ConversationLogger.Common
         public static T Deserialize<T>(this string path)
         {
             Serializers.GetOrAdd(typeof(T), t => new XmlSerializer(t));
-            using (var reader = new StringReader(File.ReadAllText(path)))
+            using (var reader = new StringReader(GetFileContents(path, TimeSpan.FromMilliseconds(2000))))
             {
                 return (T)Serializers.GetOrAdd(typeof(T), t => new XmlSerializer(t)).Deserialize(reader);
             }
@@ -32,7 +32,51 @@ namespace ConversationLogger.Common
                 using (var xwriter = XmlWriter.Create(writer, WriterSettings))
                 {
                     Serializers.GetOrAdd(typeof(T), t => new XmlSerializer(t)).Serialize(xwriter, instance);
-                    File.WriteAllText(path, writer.ToString(), Encoding.UTF8);
+                    PutFileContents(path, writer.ToString(), Encoding.UTF8, TimeSpan.FromMilliseconds(1000));
+                }
+            }
+        }
+
+        private static string GetFileContents(string path, TimeSpan maxWaitTime)
+        {
+            var contents = string.Empty;
+            var endWait = DateTime.Now.Add(maxWaitTime);
+            while (string.IsNullOrEmpty(contents))
+            {
+                try
+                {
+                    contents = File.ReadAllText(path);
+                }
+                catch
+                {
+                    if (DateTime.Now > endWait)
+                    {
+                        throw;
+                    }
+                    Task.Delay(100).Wait();
+                }
+            }
+
+            return contents;
+        }
+
+        private static void PutFileContents(string path, string contents, Encoding encoding, TimeSpan maxWaitTime)
+        {
+            var endWait = DateTime.Now.Add(maxWaitTime);
+            while (true)
+            {
+                try
+                {
+                    File.WriteAllText(path, contents, encoding);
+                    return;
+                }
+                catch
+                {
+                    if (DateTime.Now > endWait)
+                    {
+                        throw;
+                    }
+                    Task.Delay(100).Wait();
                 }
             }
         }

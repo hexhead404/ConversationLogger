@@ -19,5 +19,11 @@ namespace ConversationLogger.Common
         public string ContactEmail { get; set; }
 
         public string Text { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{(this.Direction == MessageDirection.Incoming ? "-->" : "<--")} [{this.TimeStamp:g}] {this.Contact}: {this.Text}";
+        }
     }
 }

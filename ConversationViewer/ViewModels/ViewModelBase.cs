@@ -11,7 +11,7 @@ namespace ConversationLogger.Viewer.ViewModels
     public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
         /// <inheritdoc />
-        public virtual event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <inheritdoc />
         public void Dispose()
@@ -34,7 +34,7 @@ namespace ConversationLogger.Viewer.ViewModels
         /// <param name="propertyName"></param>
         protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
     }
