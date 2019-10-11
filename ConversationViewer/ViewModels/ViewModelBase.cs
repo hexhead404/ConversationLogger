@@ -1,4 +1,7 @@
-﻿
+﻿// <copyright file="ViewModelBase.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System;
@@ -6,7 +9,7 @@ namespace ConversationLogger.Viewer.ViewModels
     using System.Runtime.CompilerServices;
 
     /// <summary>
-    /// A base class for view model implementations
+    /// A base class for view model implementations.
     /// </summary>
     public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
@@ -16,26 +19,25 @@ namespace ConversationLogger.Viewer.ViewModels
         /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         /// <summary>
-        /// Dispose resources
+        /// Dispose resources.
         /// </summary>
-        /// <param name="disposing">Whether this method was called from the <see cref="Dispose"/> method</param>
+        /// <param name="disposing">Whether this method was called from the <see cref="Dispose"/> method.</param>
         protected virtual void Dispose(bool disposing)
         {
         }
-        
+
         /// <summary>
-        /// Fires the <see cref="PropertyChanged"/> event for the specified property
+        /// Fires the <see cref="PropertyChanged"/> event for the specified property.
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param name="propertyName">The name of the property that changed.</param>
         protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }

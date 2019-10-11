@@ -1,4 +1,7 @@
-﻿
+﻿// <copyright file="ConversationLogsViewModel.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System;
@@ -8,10 +11,10 @@ namespace ConversationLogger.Viewer.ViewModels
     using System.Linq;
     using System.Windows;
     using System.Windows.Data;
-    using Common;
+    using ConversationLogger.Common;
 
     /// <summary>
-    /// A view model class for conversation logs
+    /// A view model class for conversation logs.
     /// </summary>
     public class ConversationLogsViewModel : ViewModelBase
     {
@@ -22,12 +25,12 @@ namespace ConversationLogger.Viewer.ViewModels
         private ConversationLogViewModel currentLog;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConversationLogsViewModel"/> class
+        /// Initializes a new instance of the <see cref="ConversationLogsViewModel"/> class.
         /// </summary>
         public ConversationLogsViewModel()
         {
             this.watcher = new FileSystemWatcher(Constants.LogFolder, "*.xml") { IncludeSubdirectories = false };
-            this.watcher.Renamed += WatcherOnRenamed;
+            this.watcher.Renamed += this.WatcherOnRenamed;
             this.watcher.Changed += this.WatcherOnOtherChange;
             this.watcher.Created += this.WatcherOnOtherChange;
             this.watcher.Deleted += this.WatcherOnOtherChange;
@@ -40,32 +43,32 @@ namespace ConversationLogger.Viewer.ViewModels
             this.AddOrUpdateLog(files);
             this.CurrentLog = this.logs.FirstOrDefault();
         }
-        
+
         /// <summary>
-        /// Gets the <see cref="SearchViewModel"/> used for searching converstion logs
+        /// Gets the <see cref="SearchViewModel"/> used for searching converstion logs.
         /// </summary>
         public SearchViewModel Search { get; }
 
         /// <summary>
-        /// Gets the available log files
+        /// Gets the available log files.
         /// </summary>
         public ICollectionView Logs { get; }
 
         /// <summary>
-        /// Gets or sets the current log file
+        /// Gets or sets the current log file.
         /// </summary>
         public ConversationLogViewModel CurrentLog
         {
-            get => currentLog;
+            get => this.currentLog;
             set
             {
-                currentLog = value;
+                this.currentLog = value;
                 this.NotifyPropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets or sets the status message
+        /// Gets the status message.
         /// </summary>
         public string StatusMessage { get; private set; } = "Loading conversation files";
 
@@ -76,7 +79,7 @@ namespace ConversationLogger.Viewer.ViewModels
             {
                 this.disposed = true;
                 this.watcher.EnableRaisingEvents = false;
-                this.watcher.Renamed -= WatcherOnRenamed;
+                this.watcher.Renamed -= this.WatcherOnRenamed;
                 this.watcher.Changed -= this.WatcherOnOtherChange;
                 this.watcher.Created -= this.WatcherOnOtherChange;
                 this.watcher.Deleted -= this.WatcherOnOtherChange;
@@ -84,6 +87,7 @@ namespace ConversationLogger.Viewer.ViewModels
                 this.Search.Dispose();
                 this.currentLog?.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -121,6 +125,7 @@ namespace ConversationLogger.Viewer.ViewModels
                     log.Dispose();
                 }
             }
+
             this.UpdateStatus();
         }
 
@@ -135,29 +140,29 @@ namespace ConversationLogger.Viewer.ViewModels
             {
                 foreach (var path in paths)
                 {
-                    var log = this.logs.FirstOrDefault(x => x.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
-                    if (log == null)
+                    var entry = this.logs.FirstOrDefault(x => x.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+                    if (entry != null)
                     {
-                        log = new ConversationLogViewModel(path);
-                        int i;
-                        for (i = 0; i < this.logs.Count && this.logs[i].Started > log.Started; i++)
-                        {
-                        }
-                        this.logs.Insert(i, log);
+                        entry.LoadConversation();
                     }
                     else
                     {
-                        log.LoadConversation();
+                        entry = new ConversationLogViewModel(path);
+                        var before = this.logs.FirstOrDefault(l => l.Started <= entry.Started);
+
+                        this.logs.Insert(Math.Max(this.logs.IndexOf(before), 0), entry);
                     }
                 }
             }
+
             if (!string.IsNullOrEmpty(this.Search.Filter))
             {
                 this.Search.ApplyLogFilter();
             }
+
             this.UpdateStatus();
         }
-        
+
         private void UpdateStatus()
         {
             lock (this.logs)
@@ -167,6 +172,7 @@ namespace ConversationLogger.Viewer.ViewModels
                 {
                     this.StatusMessage += $", {this.logs.Sum(x => x.Messages.OfType<MessageViewModel>().Count(m => m.IsFilterMatch))} filter matches";
                 }
+
                 this.NotifyPropertyChanged(nameof(this.StatusMessage));
             }
         }

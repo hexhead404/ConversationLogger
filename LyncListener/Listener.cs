@@ -1,4 +1,7 @@
-﻿
+﻿// <copyright file="Listener.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.LyncListener
 {
     using System;
@@ -8,17 +11,26 @@ namespace ConversationLogger.LyncListener
     using Microsoft.Lync.Model;
     using Microsoft.Lync.Model.Conversation;
 
+    /// <summary>
+    /// A class that listens for Lync conversations.
+    /// </summary>
     public class Listener : IDisposable
     {
         private readonly ConcurrentDictionary<Conversation, Logger> logs = new ConcurrentDictionary<Conversation, Logger>();
 
         private LyncClient client;
 
+        /// <summary>
+        /// Starts listening for conversations.
+        /// </summary>
         public void StartListening()
         {
             this.Connect();
         }
 
+        /// <summary>
+        /// Stops listening for conversations.
+        /// </summary>
         public void StopListening()
         {
             this.Disconnect();
@@ -27,10 +39,14 @@ namespace ConversationLogger.LyncListener
         /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Provides the opportunity for sub-classes to dispose of resources.
+        /// </summary>
+        /// <param name="disposing">Whether this method was called from the <see cref="Dispose"/> method.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -46,11 +62,11 @@ namespace ConversationLogger.LyncListener
             {
                 try
                 {
-                    client = LyncClient.GetClient();
-                    client.ClientDisconnected += ClientOnClientDisconnected;
-                    client.ConversationManager.ConversationAdded += this.ConversationAdded;
-                    client.ConversationManager.ConversationRemoved += this.ConversationRemoved;
-                    client.ConversationManager.Conversations?.ToList().ForEach(this.AddConversation);
+                    this.client = LyncClient.GetClient();
+                    this.client.ClientDisconnected += this.ClientOnClientDisconnected;
+                    this.client.ConversationManager.ConversationAdded += this.ConversationAdded;
+                    this.client.ConversationManager.ConversationRemoved += this.ConversationRemoved;
+                    this.client.ConversationManager.Conversations?.ToList().ForEach(this.AddConversation);
                     Console.WriteLine("Ready");
                     return;
                 }
@@ -65,21 +81,21 @@ namespace ConversationLogger.LyncListener
         private void ClientOnClientDisconnected(object sender, EventArgs e)
         {
             Console.WriteLine("Client disconnected");
-            this.Disconnect();;
+            this.Disconnect();
             this.Connect();
         }
 
         private void Disconnect()
         {
-            if (client != null)
+            if (this.client != null)
             {
-                client.ClientDisconnected -= ClientOnClientDisconnected;
-                client.ConversationManager.ConversationAdded -= this.ConversationAdded;
-                client.ConversationManager.ConversationRemoved -= this.ConversationRemoved;
+                this.client.ClientDisconnected -= this.ClientOnClientDisconnected;
+                this.client.ConversationManager.ConversationAdded -= this.ConversationAdded;
+                this.client.ConversationManager.ConversationRemoved -= this.ConversationRemoved;
                 this.logs.Keys.ToList().ForEach(this.RemoveConversation);
             }
 
-            client = null;
+            this.client = null;
         }
 
         private void AddConversation(Conversation conversation)
@@ -95,7 +111,6 @@ namespace ConversationLogger.LyncListener
             if (this.logs.TryRemove(conversation, out var log))
             {
                 log.Dispose();
-                
             }
         }
 

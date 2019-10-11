@@ -7,7 +7,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:ConversationLogger.Viewer.Behaviors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Conversation Viewer" Height="450" Width="800">
     <Window.Resources>
         <Style TargetType="{x:Type Button}">
             <Setter Property="Margin" Value="4,0,0,0" />
@@ -67,9 +67,10 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="4"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="8,0">
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="8,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -87,11 +88,12 @@
         <ListView Grid.Row="1" Grid.Column="0" SelectionMode="Single" ItemsSource="{Binding Logs}" SelectedItem="{Binding CurrentLog}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Started, StringFormat=G}"/>
+                    <TextBlock Text="{Binding Started, StringFormat=G}" ToolTip="{Binding Participants}"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding CurrentLog}" Margin="8,0">
+        <GridSplitter Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding CurrentLog}" Margin="8,0">
             <Grid.InputBindings>
                 <KeyBinding Key="C" Modifiers="Control" Command="{Binding CopyCommand}"/>
             </Grid.InputBindings>
@@ -100,9 +102,12 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" FontWeight="Medium">
+            <TextBlock Grid.Row="0" Margin="0,0,0,8" FontWeight="Medium">
                 <Run>Conversation started </Run>
                 <TextBlock Text="{Binding Started, StringFormat=G}"/>
+                <LineBreak/>
+                <Run>With </Run>
+                <TextBlock Text="{Binding Participants}"/>
             </TextBlock>
             <ListView Grid.Row="1"
                      ItemsSource="{Binding Messages}" SelectionMode="Extended"
@@ -135,7 +140,7 @@
                 <Button Content="Exit" Click="CloseButtonOnClick" />
             </StackPanel>
         </Grid>
-        <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+        <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
             <StatusBarItem>
                 <TextBlock Text="{Binding StatusMessage}" />
             </StatusBarItem>

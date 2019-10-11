@@ -1,24 +1,24 @@
-﻿
+﻿// <copyright file="SearchViewModel.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System.Linq;
-    using Common;
+    using ConversationLogger.Common;
 
+    /// <summary>
+    /// A view model for searching messages.
+    /// </summary>
     public class SearchViewModel : ViewModelBase
     {
         private readonly ConversationLogsViewModel owner;
         private string filter;
 
-        private enum SearchDirection
-        {
-            Forward = 0,
-            Backward = 1
-        }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="SearchViewModel"/> class
+        /// Initializes a new instance of the <see cref="SearchViewModel"/> class.
         /// </summary>
-        /// <param name="logs">The <see cref="ConversationLogsViewModel"/> that will be searched</param>
+        /// <param name="logs">The <see cref="ConversationLogsViewModel"/> that will be searched.</param>
         public SearchViewModel(ConversationLogsViewModel logs)
         {
             this.owner = logs.AssertParamterNotNull(nameof(logs));
@@ -28,8 +28,21 @@ namespace ConversationLogger.Viewer.ViewModels
             this.ClearFilterCommand = new Command(this, o => !string.IsNullOrEmpty(this.Filter), o => this.Filter = string.Empty);
         }
 
+        private enum SearchDirection
+        {
+            /// <summary>
+            /// Search forward.
+            /// </summary>
+            Forward = 0,
+
+            /// <summary>
+            /// Search backward.
+            /// </summary>
+            Backward = 1,
+        }
+
         /// <summary>
-        /// Gets or sets the search filter
+        /// Gets or sets the search filter.
         /// </summary>
         public string Filter
         {
@@ -46,22 +59,22 @@ namespace ConversationLogger.Viewer.ViewModels
         }
 
         /// <summary>
-        /// Gets a command to find the next filter match
+        /// Gets a command to find the next filter match.
         /// </summary>
         public Command NextMatchCommand { get; }
-        
+
         /// <summary>
-        /// Gets a command to find the previous filter match
+        /// Gets a command to find the previous filter match.
         /// </summary>
         public Command PrevMatchCommand { get; }
 
         /// <summary>
-        /// Gets a command to clear the search filter
+        /// Gets a command to clear the search filter.
         /// </summary>
         public Command ClearFilterCommand { get; }
 
         /// <summary>
-        /// Applies the filter to the logs
+        /// Applies the filter to the logs.
         /// </summary>
         internal void ApplyLogFilter()
         {
@@ -78,6 +91,7 @@ namespace ConversationLogger.Viewer.ViewModels
                 this.PrevMatchCommand.Dispose();
                 this.ClearFilterCommand.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -86,7 +100,7 @@ namespace ConversationLogger.Viewer.ViewModels
             var vm = (ConversationLogViewModel)obj;
             var messages = vm.Messages.OfType<MessageViewModel>().ToList();
 
-            messages.ForEach(m => m.TryMatchFilter(this.filter));
+            messages.ForEach(m => m.Matches(this.filter));
 
             return string.IsNullOrEmpty(this.filter) || messages.Any(x => x.IsFilterMatch);
         }
@@ -97,7 +111,7 @@ namespace ConversationLogger.Viewer.ViewModels
                 ? this.owner.Logs.OfType<ConversationLogViewModel>()
                 : this.owner.Logs.OfType<ConversationLogViewModel>().Reverse();
             var lookup = filtered.ToDictionary(
-                f => f, 
+                f => f,
                 f => direction == SearchDirection.Forward
                     ? f.Messages.OfType<MessageViewModel>().Where(m => m.IsFilterMatch).ToList()
                     : f.Messages.OfType<MessageViewModel>().Where(m => m.IsFilterMatch).Reverse().ToList());
@@ -106,8 +120,8 @@ namespace ConversationLogger.Viewer.ViewModels
                 if (this.owner.CurrentLog != null && lookup.TryGetValue(this.owner.CurrentLog, out var matches))
                 {
                     // In the current log, search from the current item
-                    var match = matches.Contains(this.owner.CurrentLog.Messages.CurrentItem) 
-                        ? matches.SkipWhile(m => !m.Equals(this.owner.CurrentLog.Messages.CurrentItem)).Skip(1).FirstOrDefault() 
+                    var match = matches.Contains(this.owner.CurrentLog.Messages.CurrentItem)
+                        ? matches.SkipWhile(m => !m.Equals(this.owner.CurrentLog.Messages.CurrentItem)).Skip(1).FirstOrDefault()
                         : matches.FirstOrDefault();
                     if (match != null)
                     {

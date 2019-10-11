@@ -1,16 +1,23 @@
-﻿namespace ConversationLogger.Viewer
+﻿// <copyright file="MainWindow.xaml.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
+namespace ConversationLogger.Viewer
 {
     using System.Windows;
-    using ViewModels;
+    using ConversationLogger.Viewer.ViewModels;
 
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml.
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             var viewmodel = new ConversationLogsViewModel();
             this.DataContext = viewmodel;

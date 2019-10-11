@@ -1,11 +1,14 @@
-﻿
+﻿// <copyright file="MessageViewModel.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System;
-    using Common;
+    using ConversationLogger.Common;
 
     /// <summary>
-    /// A view model class for conversation messages
+    /// A view model class for conversation messages.
     /// </summary>
     public class MessageViewModel : ViewModelBase
     {
@@ -14,10 +17,10 @@ namespace ConversationLogger.Viewer.ViewModels
         private bool isCurrentMessage;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageViewModel"/> class
+        /// Initializes a new instance of the <see cref="MessageViewModel"/> class.
         /// </summary>
-        /// <param name="conversation">The conversation that the message belongs to</param>
-        /// <param name="message">The <see cref="Message"/> that this view model is based upon</param>
+        /// <param name="conversation">The conversation that the message belongs to.</param>
+        /// <param name="message">The <see cref="Message"/> that this view model is based upon.</param>
         public MessageViewModel(ConversationLogViewModel conversation, Message message)
         {
             this.Conversation = conversation.AssertParamterNotNull(nameof(conversation));
@@ -30,81 +33,89 @@ namespace ConversationLogger.Viewer.ViewModels
         }
 
         /// <summary>
-        /// Gets the <see cref="ConversationLogViewModel"/> this message belongs to
+        /// Gets the <see cref="ConversationLogViewModel"/> this message belongs to.
         /// </summary>
         public ConversationLogViewModel Conversation { get; }
 
         /// <summary>
-        /// Gets the message timestamp
+        /// Gets the message timestamp.
         /// </summary>
         public DateTime TimeStamp { get; }
 
         /// <summary>
-        /// Gets the contact name
+        /// Gets the contact name.
         /// </summary>
-        public string Contact  { get; }
+        public string Contact { get; }
 
         /// <summary>
-        /// Gets the contact email address
+        /// Gets the contact email address.
         /// </summary>
-        public string ContactEmail  { get; }
+        public string ContactEmail { get; }
 
         /// <summary>
-        /// Gets the message direction
+        /// Gets the message direction.
         /// </summary>
-        public MessageDirection Direction  { get; }
+        public MessageDirection Direction { get; }
 
         /// <summary>
-        /// Gets the message text
+        /// Gets the message text.
         /// </summary>
-        public string Text  { get; }
+        public string Text { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the message is selected
+        /// Gets or sets a value indicating whether the message is selected.
         /// </summary>
         public bool IsSelected
         {
-            get => isSelected;
+            get => this.isSelected;
             set
             {
                 if (value != this.isSelected)
                 {
-                    isSelected = value;
+                    this.isSelected = value;
                     this.NotifyPropertyChanged();
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the message is included in the filtered results
+        /// Gets a value indicating whether the message is included in the filtered results.
         /// </summary>
         public bool IsFilterMatch
         {
-            get => isFilterMatch;
+            get => this.isFilterMatch;
             private set
             {
                 if (value != this.isFilterMatch)
                 {
-                    isFilterMatch = value;
+                    this.isFilterMatch = value;
                     this.NotifyPropertyChanged();
                 }
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the message is the current message.
+        /// </summary>
         public bool IsCurrentMessage
         {
-            get => isCurrentMessage;
+            get => this.isCurrentMessage;
             private set
             {
                 if (value != this.isCurrentMessage)
                 {
-                    isCurrentMessage = value;
+                    this.isCurrentMessage = value;
                     this.NotifyPropertyChanged();
                 }
             }
         }
 
-        public bool TryMatchFilter(string filter)
+        /// <summary>
+        /// Determines whether the message matches the specified filter.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        /// <returns>Whether the message matches the filter.</returns>
+        public bool Matches(string filter)
         {
             this.IsFilterMatch = !string.IsNullOrEmpty(filter)
                 && (this.Contact.ContainsStringIgnoreCase(filter) || this.Text.ContainsStringIgnoreCase(filter));
@@ -122,6 +133,7 @@ namespace ConversationLogger.Viewer.ViewModels
             {
                 this.Conversation.Messages.CurrentChanged -= this.ConversationMessagesOnCurrentChanged;
             }
+
             base.Dispose(disposing);
         }
 

@@ -1,4 +1,7 @@
-﻿
+﻿// <copyright file="ConversationLogViewModel.cs" company="Hexhead404">
+// Copyright (c) Hexhead404. All rights reserved.
+// </copyright>
+
 namespace ConversationLogger.Viewer.ViewModels
 {
     using System;
@@ -7,10 +10,10 @@ namespace ConversationLogger.Viewer.ViewModels
     using System.Linq;
     using System.Windows;
     using System.Windows.Data;
-    using Common;
+    using ConversationLogger.Common;
 
     /// <summary>
-    /// A view model for conversation log
+    /// A view model for a conversation log.
     /// </summary>
     public class ConversationLogViewModel : ViewModelBase
     {
@@ -19,9 +22,9 @@ namespace ConversationLogger.Viewer.ViewModels
         private bool disposed;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConversationLogViewModel"/> class
+        /// Initializes a new instance of the <see cref="ConversationLogViewModel"/> class.
         /// </summary>
-        /// <param name="path">The log file path</param>
+        /// <param name="path">The log file path.</param>
         public ConversationLogViewModel(string path)
         {
             this.Path = path.AssertParamterFileExists(nameof(path));
@@ -31,42 +34,47 @@ namespace ConversationLogger.Viewer.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the conversation identifier
+        /// Gets or sets the conversation identifier.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets the log file path
+        /// Gets the log file path.
         /// </summary>
         public string Path { get; private set; }
 
         /// <summary>
-        /// Gets the conversation titme
+        /// Gets the conversation titme.
         /// </summary>
         public string Title { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="DateTime"/> that the conversation started
+        /// Gets the <see cref="DateTime"/> that the conversation started.
         /// </summary>
         public DateTime Started { get; private set; }
 
         /// <summary>
-        /// Gets the messages
+        /// Gets the messages.
         /// </summary>
         public ICollectionView Messages { get; }
 
         /// <summary>
-        /// Gets a value indicating whether message(s) are selected
+        /// Gets the participants in the conversation.
+        /// </summary>
+        public string Participants => string.Join(", ", this.messages.Select(m => m.Contact).Distinct());
+
+        /// <summary>
+        /// Gets a value indicating whether message(s) are selected.
         /// </summary>
         public bool AreMessagesSelected => this.Messages.OfType<MessageViewModel>().Any(m => m.IsSelected);
 
         /// <summary>
-        /// Gets a command to copy selected messages to the clipboard
+        /// Gets a command to copy selected messages to the clipboard.
         /// </summary>
         public Command CopyCommand { get; private set; }
-        
+
         /// <summary>
-        /// Loads the conversation from disk
+        /// Loads the conversation from disk.
         /// </summary>
         public void LoadConversation()
         {
@@ -79,7 +87,9 @@ namespace ConversationLogger.Viewer.ViewModels
 
             this.messages.ToList().ForEach(this.RemoveMessage);
             log.Messages.OrderBy(m => m.TimeStamp).ToList().ForEach(this.AddMessage);
+
             this.NotifyPropertyChanged(nameof(this.Messages));
+            this.NotifyPropertyChanged(nameof(this.Participants));
         }
 
         /// <inheritdoc />
@@ -91,6 +101,7 @@ namespace ConversationLogger.Viewer.ViewModels
                 this.messages.ToList().ForEach(this.RemoveMessage);
                 this.CopyCommand.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
